@@ -23,7 +23,7 @@ trait RestService extends HttpService {
   val restmethodRoute = path("accounts") {
     get { ctx =>
 
-      val cityList = PlainSqlData.cityList
+      val cityList = PlainSqlData.cityListByDistrict("Dhaka")
       ctx.complete(cityList.toJson.toString())
     }
 
