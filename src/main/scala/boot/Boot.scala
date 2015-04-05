@@ -17,14 +17,12 @@ object Boot extends App with Configuration {
   implicit val system = ActorSystem("spray-rest-service-example")
 
   // create and start rest service actor
- // val restService = system.actorOf(Props (classOf[RestServiceActor]), "rest-endpoint")
-   val restService = system.actorOf(Props[RestServiceActor], "rest-endpoint")
-
+  // val restService = system.actorOf(Props (classOf[RestServiceActor]), "rest-endpoint")
+  val restService = system.actorOf(Props[RestServiceActor], "rest-endpoint")
 
   // start Http server with rest service actor as a handler
-
   implicit val timeout = Timeout(5.seconds)
 
-//  IO(Http) ! (Http.Bind(restService, interface = "localhost",  port = "servicePort"))
-  IO(Http) ! Http.Bind(restService, interface = "localhost",port = 8383)
+  //  IO(Http) ! (Http.Bind(restService, interface = "localhost",  port = "servicePort"))
+  IO(Http) ! Http.Bind(restService, interface = "localhost", port = 8383)
 }
