@@ -2,6 +2,7 @@ package dao
 
 import boot.Boot
 
+import scala.slick.direct.AnnotationMapper.column
 import scala.slick.driver.MySQLDriver.simple._
 import scala.slick.jdbc.StaticQuery.interpolation
 import scala.slick.jdbc.meta.DatabaseMeta
@@ -11,6 +12,15 @@ import config.Configuration
 
 import scala.util.Try
 
+class Cities(tag: Tag) extends Table[(Int, String, String, String, Int)](tag, "CITY") {
+  def id = column[Int]("ID", O.PrimaryKey)
+  def name = column[String]("NAME")
+  def countryCode = column[String]("COUNTRYCODE")
+  def district = column[String]("DISTRICT")
+  def population = column[Int]("POPULATION")
+
+  def * = (id, name, countryCode, district, population)
+}
 
 object PlainSqlData extends Configuration {
 
@@ -18,7 +28,7 @@ object PlainSqlData extends Configuration {
   //   user = dbUser, password = dbPassword, driver = "com.mysql.jdbc.Driver")
 
   case class cityListByDistrict(cityId: Int, cityName: String, cityCountryCode: String, cityDistrict: String, cityPopulation: Int)
-
+  lazy val cities = TableQuery[Cities]
   // Database Connection stuff with Slick is here
   val db = Boot.connect()
 
@@ -30,9 +40,26 @@ object PlainSqlData extends Configuration {
                                      where District = $district;""".as[(Int, String, String, String, Int)]
 
     cityInformationQuery.list map tupleToCityListByDistrict
+
+    /* val cityInformationQuery = sql"""SELECT *
+                                      FROM city
+                                      where District = $district;""".as[cityListByDistrict]
+
+     cityInformationQuery.list
+     This doesnt work but I want to know why */
   }
 
+  def allcities = db.withSession { implicit session =>
+    val cityInformationQuery =  cities.map(p => (p.id,p.name,p.countryCode,p.district,p.population))
+    cityInformationQuery.list map tupleToCityListByDistrict
+  }
+
+  def getCitiesByDistrict(cityDistrict: String) = db.withSession{ implicit session =>
+    val citiesByDistrictQuery = cities.filter(p => p.district === cityDistrict)
+    citiesByDistrictQuery.list map tupleToCityListByDistrict
+  }
 }
+
 
 
 

@@ -14,9 +14,8 @@ class RestServiceActor() extends Actor with RestService {
 
   implicit def actorRefFactory = context
 
-  def receive = runRoute(restmethodRoute)
+  def receive = runRoute(restmethodRoute ~ restmethodRoute2 ~ restmethodRoute3)
 }
-
 
 trait RestService extends HttpService {
 
@@ -28,6 +27,21 @@ trait RestService extends HttpService {
     }
 
   }
-}
 
+  val restmethodRoute2 = path("getAllCities") {
+    get { ctx =>
+
+      val cityList = PlainSqlData.allcities
+      ctx.complete(cityList.toJson.toString())
+    }
+  }
+
+  val restmethodRoute3 = path("getCitiesByDistrict" / Segment) {(cityDistrict) =>
+    get { ctx =>
+
+      val cityList = PlainSqlData.getCitiesByDistrict(cityDistrict)
+      ctx.complete(cityList.toJson.toString())
+    }
+  }
+}
 
